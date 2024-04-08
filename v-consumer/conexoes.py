@@ -3,10 +3,7 @@ import redis
 from minio import Minio
 
 def connect_rabbitmq():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(
-        host="rabbitmq",
-        port=5672,
-        virtual_host="/"))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host="rabbitmq", port=5672, virtual_host="/", credentials=pika.PlainCredentials("admin","admin")))
     channel = connection.channel()
     return channel
 

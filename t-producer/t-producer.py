@@ -4,7 +4,7 @@ import pika
 import os
 import time
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(host="rabbitmq", port=5672, virtual_host="/", credentials=pika.PlainCredentials("guest","guest")))
+connection = pika.BlockingConnection(pika.ConnectionParameters(host="rabbitmq", port=5672, virtual_host="/", credentials=pika.PlainCredentials("admin","admin")))
 
 channel = connection.channel()
 
