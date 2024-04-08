@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.12.13-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: "rabbitmq-diagnostics check_port_connectivity --formatter json | tail -1 | grep -q '\"result\":\"ok\"'"
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
+    networks:
+      - rede-1
+
+  redis:
+    image: redis/redis-stack:7.2.0-v10
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    environment:
+      - REDIS_HOST=redis
+    healthcheck:
+      test: "redis-cli ping"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rede-1
+
+  minio:
+    image: bitnami/minio:2024.3.30
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rede-1
+
+  t-producer:
+    image: producer
+    build: .
+    command: t-producer.py
+    depends_on:
+      - rabbitmq
+      - redis
+      - minio
+    networks:
+      - rede-1
+
+  consumer-validador:
+    image: consumer
+    build: .
+    command: consumer-validador.py
+    depends_on:
+      - rabbitmq
+      - redis
+      - minio
+    networks:
+      - rede-1
+
+networks:
+  rede-1:
