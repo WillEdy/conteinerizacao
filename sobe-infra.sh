@@ -1,7 +1,5 @@
 #!/bin/bash
 
-docker build .
-
 docker compose build
 
 docker volume create rabbitmq_data
